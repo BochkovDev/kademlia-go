@@ -9,8 +9,9 @@ import (
 // Each NodeID consists of a 160-bit (20-byte) value.
 //
 // References:
-//   - Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric" [Section 1, "Introduction"; 2.1, "XOR Metric"].
-//     Retrieved from: https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
+//   - [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"] [Section 1, "Introduction"; 2.1, "XOR Metric"]
+//
+// [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"]: https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
 type NodeID [20]byte
 
 // NewNodeID generates a unique NodeID from a given input byte slice by applying the SHA-1 hashing algorithm.
@@ -24,8 +25,9 @@ type NodeID [20]byte
 //     information about the node, such as its IP address and port, to ensure a unique identifier.
 //
 // References:
-//   - Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric" [Section 1, "Introduction"].
-//     Retrieved from: https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
+//   - [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"] [Section 1, "Introduction"]
+//
+// [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"]: https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
 func NewNodeID(data []byte) NodeID {
 	hash := sha1.Sum(data)
 	return hash
@@ -48,8 +50,9 @@ func (id NodeID) Equals(other NodeID) bool {
 // lookups by enabling distance-based routing.
 //
 // References:
-//   - Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric" [Section 2.1, "XOR Metric"].
-//     Retrieved from: https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
+//   - [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"] [Section 2.1, "XOR Metric"]
+//
+// [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"]: https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
 func (id NodeID) XOR(other NodeID) [20]byte {
 	var result NodeID
 	for i := 0; i < len(id); i++ {

@@ -27,8 +27,9 @@ import (
 //     goroutines may attempt to add, remove, or access nodes concurrently.
 //
 // References:
-//   - Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric" [Section 2.2, "Node State"].
-//     URL: https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
+//   - [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"] [Section 2.2, "Node State"]
+//
+// [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"]: https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
 type KBucket struct {
 	Nodes   []*node.Node
 	MaxSize uint8
@@ -52,8 +53,9 @@ type KBucket struct {
 //   - This method uses a mutex to ensure thread safety while modifying the list of nodes.
 //
 // References:
-//   - Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric" [Section 2.2, "Node State"].
-//     URL: https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
+//   - [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"] [Section 2.2, "Node State"]
+//
+// [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"]: https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
 func (kb *KBucket) Add(newNode *node.Node) {
 	kb.mu.Lock()
 	defer kb.mu.Unlock()

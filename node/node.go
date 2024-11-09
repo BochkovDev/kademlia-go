@@ -27,8 +27,9 @@ import (
 //     0-65535. It is used for connections over TCP or UDP for data exchange in the Kademlia network.
 //
 // References:
-//   - Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric" [Section 2.2, "Node State"].
-//     Retrieved from: https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
+//   - [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"] [Section 2.2, "Node State"]
+//
+// [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"]: https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
 type Node struct {
 	ID      NodeID
 	Address net.IP
@@ -62,8 +63,9 @@ func NewNode(data []byte, address net.IP, port uint16) *Node {
 // The smaller the result, the closer the nodes are in the network.
 //
 // References:
-//   - Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric" [Section 2.1, "XOR Metric"]:
-//     https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
+//   - [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"] [Section 2.1, "XOR Metric"]
+//
+// [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"]: https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
 func (node *Node) Distance(other *Node) [20]byte {
 	return node.ID.XOR(other.ID)
 }
