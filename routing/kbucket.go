@@ -8,78 +8,111 @@ import (
 
 // KBucket represents a container for nodes within the Kademlia network.
 //
-// A KBucket is part of Kademlia's routing table that maintains a list of nodes at a specific
-// distance range from the current node. It is used to keep track of neighboring nodes and organize
-// searches for the closest nodes in the network. Each KBucket has a limited size and may evict the
-// oldest nodes when the maximum capacity is reached.
+// A KBucket is a segment of Kademlia's routing table that maintains a list of nodes
+// within a specific distance range from the current node. Each KBucket has a limited
+// size and follows a Least Recently Seen (LRS) eviction policy, where the oldest nodes
+// are removed to make space for newly added or recently active nodes.
 //
 // Fields:
-//   - Nodes []*node.Node:
-//     A slice of pointers to nodes stored in this KBucket. The nodes represent peers at a particular
-//     distance from the current node. Nodes are maintained in order of insertion, with newly added
-//     nodes appended to the end, and active nodes moved to the end upon interaction.
-//   - MaxSize uint8:
-//     The maximum number of nodes that the KBucket can contain. If this limit is reached when adding a new
-//     node, the oldest node is removed to make space.
+//   - nodes []node.INode:
+//     A slice of nodes stored in this KBucket. These nodes represent peers at a specific
+//     distance range from the current node. The slice maintains nodes in order of
+//     activity, with the most recently seen node positioned at the end.
+//   - ksize uint8:
+//     The maximum number of nodes that the KBucket can contain. If this limit is reached
+//     when adding a new node, the oldest node is evicted to make room for the new node.
 //   - mu sync.Mutex:
-//     A mutex used to protect access to the Nodes slice and other fields, ensuring that modifications to
-//     the KBucket are thread-safe. This is crucial in a distributed network environment where multiple
-//     goroutines may attempt to add, remove, or access nodes concurrently.
+//     A mutex used to synchronize access to the nodes slice, ensuring that all operations
+//     on the KBucket are thread-safe in concurrent environments.
 //
 // References:
 //   - [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"] [Section 2.2, "Node State"]
 //
 // [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"]: https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
 type KBucket struct {
-	Nodes   []*node.Node
-	MaxSize uint8
-	mu      sync.Mutex
+	nodes []node.INode
+	ksize uint8
+	mu    sync.Mutex
+}
+
+// NewKBucket creates and returns a new KBucket instance with a specified capacity for storing nodes.
+//
+// Parameters:
+//   - ksize uint8: The maximum number of nodes (K) that this KBucket can hold, based on
+//     the Kademlia protocol's specifications.
+//
+// Returns:
+//   - *KBucket: A pointer to a newly created KBucket, initialized with an empty node list
+//     and a mutex for thread safety.
+func NewKBucket(ksize uint8) *KBucket {
+	return &KBucket{
+		nodes: make([]node.INode, 0, ksize),
+		ksize: ksize,
+		mu:    sync.Mutex{},
+	}
+}
+
+// Nodes returns a slice of nodes stored in the KBucket.
+//
+// This method provides access to the nodes contained within the KBucket, representing peers
+// at a specific distance from the current node. The nodes are ordered by their last-seen time.
+//
+// Returns:
+//   - []node.INode: A slice of nodes currently stored in the KBucket.
+func (kb *KBucket) Nodes() []node.INode {
+	return kb.nodes
+}
+
+// KSize returns the maximum number of nodes that the KBucket can hold.
+//
+// This method provides the maximum capacity of the KBucket, which is fixed and determined
+// during initialization. The capacity is used to manage node evictions when the KBucket is full.
+//
+// Returns:
+//   - uint8: The maximum number of nodes that can be stored in the KBucket.
+func (kb *KBucket) KSize() uint8 {
+	return kb.ksize
 }
 
 // Add inserts a new node into the KBucket.
 //
-// If the node already exists, it is removed from its current
-// position and added to the end of the list to reflect its recent activity. If the KBucket is full and
-// does not contain the new node, the oldest node (at the beginning) is removed to make space.
-//
-// This method ensures that the KBucket maintains a list of nodes sorted by their last-seen time, with the
-// most recently seen node at the end of the list. Such behavior is crucial for maintaining efficient lookups
-// and evicting inactive nodes.
+// If the node already exists, it is removed from its current position and re-added to the end
+// of the list to reflect its recent activity. If the KBucket is full and does not contain the new node,
+// the oldest node (at the beginning) is removed to make space.
 //
 // Parameters:
-//   - newNode *node.Node: The node to be added to the KBucket.
+//   - newNode node.INode: The node to be added to the KBucket.
 //
 // Notes:
 //   - This method uses a mutex to ensure thread safety while modifying the list of nodes.
 //
 // References:
-//   - [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"] [Section 2.2, "Node State"]
+//   - [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"] [Section 2.2, "Node State"]//
 //
 // [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"]: https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
-func (kb *KBucket) Add(newNode *node.Node) {
+func (kb *KBucket) Add(newNode node.INode) {
 	kb.mu.Lock()
 	defer kb.mu.Unlock()
 
-	for i, n := range kb.Nodes {
-		if n.ID.Equals(newNode.ID) {
-			kb.Nodes = append(kb.Nodes[:i], kb.Nodes[i+1:]...)
-			kb.Nodes = append(kb.Nodes, newNode)
+	for i, n := range kb.nodes {
+		if n.ID().Equals(newNode.ID()) {
+			kb.nodes = append(kb.nodes[:i], kb.nodes[i+1:]...)
+			kb.nodes = append(kb.nodes, newNode)
 			return
 		}
 	}
 
-	if len(kb.Nodes) >= int(kb.MaxSize) {
-		kb.Nodes = kb.Nodes[1:]
+	if len(kb.nodes) >= int(kb.ksize) {
+		kb.nodes = kb.nodes[1:]
 	}
 
-	kb.Nodes = append(kb.Nodes, newNode)
+	kb.nodes = append(kb.nodes, newNode)
 }
 
 // Remove deletes a node from the KBucket based on its NodeID.
 //
-// This method searches for the node with the specified NodeID in the KBucket. If the node is found,
-// it is removed from the list of nodes. The removal operation maintains the integrity of the list, ensuring
-// the order of nodes is preserved.
+// This method searches for the node with the specified NodeID in the KBucket. If found,
+// it removes the node from the list, maintaining the order of remaining nodes.
 //
 // Parameters:
 //   - id node.NodeID: The NodeID of the node to be removed from the KBucket.
@@ -90,9 +123,9 @@ func (kb *KBucket) Remove(id node.NodeID) {
 	kb.mu.Lock()
 	defer kb.mu.Unlock()
 
-	for i, n := range kb.Nodes {
-		if n.ID.Equals(id) {
-			kb.Nodes = append(kb.Nodes[:i], kb.Nodes[i+1:]...)
+	for i, n := range kb.nodes {
+		if n.ID().Equals(id) {
+			kb.nodes = append(kb.nodes[:i], kb.nodes[i+1:]...)
 			return
 		}
 	}
@@ -116,8 +149,8 @@ func (kb *KBucket) Contains(id node.NodeID) bool {
 	kb.mu.Lock()
 	defer kb.mu.Unlock()
 
-	for _, n := range kb.Nodes {
-		if n.ID.Equals(id) {
+	for _, n := range kb.nodes {
+		if n.ID().Equals(id) {
 			return true
 		}
 	}
@@ -139,7 +172,7 @@ func (kb *KBucket) IsFull() bool {
 	kb.mu.Lock()
 	defer kb.mu.Unlock()
 
-	return len(kb.Nodes) >= int(kb.MaxSize)
+	return len(kb.nodes) >= int(kb.ksize)
 }
 
 // Size returns the current number of nodes in the KBucket.
@@ -157,7 +190,7 @@ func (kb *KBucket) Size() uint8 {
 	kb.mu.Lock()
 	defer kb.mu.Unlock()
 
-	return uint8(len(kb.Nodes))
+	return uint8(len(kb.nodes))
 }
 
 // Clear empties the KBucket by removing all nodes.
@@ -172,5 +205,5 @@ func (kb *KBucket) Clear() {
 	kb.mu.Lock()
 	defer kb.mu.Unlock()
 
-	kb.Nodes = nil
+	kb.nodes = nil
 }
