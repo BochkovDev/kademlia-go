@@ -31,9 +31,9 @@ import (
 //
 // [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"]: https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
 type Node struct {
-	ID      NodeID
-	Address net.IP
-	Port    uint16
+	id      NodeID
+	address net.IP
+	port    uint16
 }
 
 // NewNode creates and returns a new Node instance with a unique NodeID,
@@ -48,10 +48,44 @@ type Node struct {
 //   - *Node: A pointer to a newly created Node, with its ID, address, and port initialized.
 func NewNode(data []byte, address net.IP, port uint16) *Node {
 	return &Node{
-		ID:      NewNodeID(data),
-		Address: address,
-		Port:    port,
+		id:      NewNodeID(data),
+		address: address,
+		port:    port,
 	}
+}
+
+// ID returns the NodeID of the current node.
+//
+// The NodeID is a unique identifier generated from the node's relevant data,
+// such as its IP address and other parameters, used for sorting and determining
+// proximity to other nodes in the Kademlia network.
+//
+// Returns:
+//   - NodeID: The unique identifier of the node.
+func (node *Node) ID() NodeID {
+	return node.id
+}
+
+// Address returns the IP address of the current node.
+//
+// The IP address is used for network communication and can be either IPv4 or IPv6.
+// This address is necessary for establishing connections with other nodes in the network.
+//
+// Returns:
+//   - net.IP: The IP address of the node.
+func (node *Node) Address() net.IP {
+	return node.address
+}
+
+// Port returns the port number the current node is listening on.
+//
+// The port is used for establishing network connections, either over TCP or UDP,
+// and must be within the valid range (0-65535) to ensure proper communication.
+//
+// Returns:
+//   - uint16: The port number on which the node is listening.
+func (node *Node) Port() uint16 {
+	return node.port
 }
 
 // Distance calculates the distance between the current node and another node in the Kademlia DHT.
@@ -67,5 +101,5 @@ func NewNode(data []byte, address net.IP, port uint16) *Node {
 //
 // [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"]: https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
 func (node *Node) Distance(other *Node) [20]byte {
-	return node.ID.XOR(other.ID)
+	return node.ID().XOR(other.ID())
 }

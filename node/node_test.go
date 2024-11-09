@@ -16,16 +16,16 @@ func TestNewNode(t *testing.T) {
 	testNode := node.NewNode(data, address, port)
 
 	expectedID := node.NewNodeID(data)
-	if testNode.ID != expectedID {
-		t.Errorf("node.NewNode failed, expected ID %x, got %x", expectedID, testNode.ID)
+	if testNode.ID() != expectedID {
+		t.Errorf("node.NewNode failed, expected id %x, got %x", expectedID, testNode.ID())
 	}
 
-	if !testNode.Address.Equal(address) {
-		t.Errorf("node.NewNode failed, expected Address %s, got %s", address, testNode.Address)
+	if !testNode.Address().Equal(address) {
+		t.Errorf("node.NewNode failed, expected address %s, got %s", address, testNode.Address())
 	}
 
-	if testNode.Port != port {
-		t.Errorf("node.NewNode failed, expected Port %d, got %d", port, testNode.Port)
+	if testNode.Port() != port {
+		t.Errorf("node.NewNode failed, expected port %d, got %d", port, testNode.Port())
 	}
 }
 
@@ -40,7 +40,7 @@ func TestDistance(t *testing.T) {
 	node1 := node.NewNode(data1, address1, port)
 	node2 := node.NewNode(data2, address2, port)
 
-	expectedDistance := node1.ID.XOR(node2.ID)
+	expectedDistance := node1.ID().XOR(node2.ID())
 	calculatedDistance := node1.Distance(node2)
 
 	if calculatedDistance != expectedDistance {
