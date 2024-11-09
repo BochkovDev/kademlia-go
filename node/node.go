@@ -62,8 +62,8 @@ func NewNode(data []byte, address net.IP, port uint16) *Node {
 //
 // Returns:
 //   - NodeID: The unique identifier of the node.
-func (node *Node) ID() NodeID {
-	return node.id
+func (n *Node) ID() NodeID {
+	return n.id
 }
 
 // Address returns the IP address of the current node.
@@ -73,8 +73,8 @@ func (node *Node) ID() NodeID {
 //
 // Returns:
 //   - net.IP: The IP address of the node.
-func (node *Node) Address() net.IP {
-	return node.address
+func (n *Node) Address() net.IP {
+	return n.address
 }
 
 // Port returns the port number the current node is listening on.
@@ -84,8 +84,8 @@ func (node *Node) Address() net.IP {
 //
 // Returns:
 //   - uint16: The port number on which the node is listening.
-func (node *Node) Port() uint16 {
-	return node.port
+func (n *Node) Port() uint16 {
+	return n.port
 }
 
 // Distance calculates the distance between the current node and another node in the Kademlia DHT.
@@ -100,6 +100,6 @@ func (node *Node) Port() uint16 {
 //   - [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"] [Section 2.1, "XOR Metric"]
 //
 // [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"]: https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
-func (node *Node) Distance(other *Node) [20]byte {
-	return node.ID().XOR(other.ID())
+func (n *Node) Distance(other *Node) [20]byte {
+	return n.ID().XOR(other.ID())
 }
