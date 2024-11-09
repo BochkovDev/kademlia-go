@@ -4,55 +4,44 @@ import "github.com/BochkovDev/kademlia-go/node"
 
 // IKBucket defines the interface for managing a K-bucket in the Kademlia DHT routing table.
 //
-// The IKBucket interface provides a set of methods for interacting with a K-bucket,
-// a data structure that stores a subset of nodes in the network, based on the Kademlia protocol's
-// routing and proximity rules. Each K-bucket holds a limited number of nodes (defined by KSize),
-// allowing efficient routing and node management by maintaining the closest nodes to a given ID.
+// The IKBucket interface provides methods for interacting with a K-bucket, which is a data structure
+// used in the Kademlia protocol to store a subset of nodes based on proximity in the keyspace. A K-bucket
+// stores nodes within a specific range and ensures efficient node management by keeping track of the closest
+// nodes to a given ID. Each K-bucket has a fixed capacity (KSize) and follows the Kademlia protocol's rules
+// for adding, removing, and evicting nodes.
 //
-// Methods:
-//
-//   - Nodes() []*node.INode:
-//     Returns a slice of nodes currently stored in the K-bucket. This list includes
-//     the nodes ordered by proximity to the bucket's range in the keyspace.
-//
-//   - KSize() uint8:
-//     Returns the maximum capacity of nodes that can be stored in the K-bucket. This is typically
-//     a fixed value, ensuring consistency across buckets and enabling efficient routing.
-//
-//   - Add(newNode *node.INode):
-//     Adds a new node to the K-bucket. If the bucket is full, this method may replace the least
-//     recently seen node depending on the protocol's eviction policy.
-//
-//   - Remove(id node.NodeID):
-//     Removes a node from the K-bucket based on its unique identifier. This is used to
-//     discard unreachable or outdated nodes, maintaining the relevance of nodes in the bucket.
-//
-//   - Contains(id node.NodeID) bool:
-//     Checks if a node with the given identifier exists in the K-bucket. This is helpful for
-//     avoiding duplicate entries and quickly locating nodes within the bucket.
-//
-//   - IsFull() bool:
-//     Returns true if the K-bucket has reached its capacity (KSize) and can no longer
-//     accept new nodes. This helps enforce the K-bucket size limitation.
-//
-//   - Size() uint8:
-//     Returns the current number of nodes in the K-bucket, providing an overview of how
-//     many active nodes are currently being tracked in this bucket.
-//
-//   - Clear():
-//     Clears all nodes from the K-bucket, effectively resetting it. This can be useful
-//     for maintenance or reinitialization purposes.
-//
-// By implementing the IKBucket interface, it is possible to manage nodes efficiently
-// within a Kademlia-based DHT, following the protocol’s rules for storing and
-// retrieving nodes based on proximity and reachability.
+// By implementing the IKBucket interface, a K-bucket can efficiently manage nodes in a Kademlia-based DHT,
+// adhering to the protocol's requirements for proximity-based routing and node management.
 type IKBucket interface {
+	// Nodes returns a slice of nodes currently stored in the K-bucket, ordered by proximity
+	// to the bucket's range in the keyspace. The most recently active nodes are placed at the end.
 	Nodes() []*node.INode
+
+	// KSize returns the maximum number of nodes that the K-bucket can hold.
+	// This value is typically a fixed constant.
 	KSize() uint8
+
+	// Add inserts a new node into the K-bucket. If the K-bucket is full,
+	// the least recently seen node may be evicted to make room for the new node.
 	Add(newNode *node.INode)
+
+	// Remove deletes a node from the K-bucket using its NodeID.
+	// This is typically used to remove unreachable or outdated nodes.
 	Remove(id node.NodeID)
+
+	// Contains checks if a node with the given NodeID is present in the K-bucket.
+	// Returns true if the node exists, otherwise false.
 	Contains(id node.NodeID) bool
+
+	// IsFull returns true if the K-bucket has reached its maximum capacity (KSize).
+	// If true, no additional nodes can be added until space is freed.
 	IsFull() bool
+
+	// Size returns the current number of nodes in the K-bucket.
+	// This helps monitor how many nodes are actively being tracked.
 	Size() uint8
+
+	// Clear removes all nodes from the K-bucket, effectively resetting it.
+	// This can be useful for maintenance or reinitialization purposes.
 	Clear()
 }

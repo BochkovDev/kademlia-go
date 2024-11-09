@@ -6,34 +6,19 @@ import (
 
 // Node represents a node in the Kademlia DHT network.
 //
-// Each node is identified by a unique identifier (ID) and can have
-// an IP address through which it is accessible, along with a port for establishing connections.
-// It also stores the last seen time of the node.
-// This struct is used to store and share information about other nodes in the Kademlia network.
-//
-// Fields:
-//
-//   - ID NodeID:
-//     Unique identifier of the node in the Kademlia network. This ID is
-//     computed based on a hash, such as the IP address and other data.
-//     It is used for sorting nodes and finding the closest nodes to the current node.
-//
-//   - Address net.IP:
-//     The IP address of the node, which can be used for establishing connections.
-//     It can be either an IPv4 or IPv6 address, depending on the network configuration.
-//
-//   - Port uint16:
-//     The port the node is listening on for incoming connections. The port must be in the range
-//     0-65535. It is used for connections over TCP or UDP for data exchange in the Kademlia network.
+// Each Node is identified by a unique identifier (ID), and it is associated
+// with an IP address and port for establishing network connections. The Node
+// struct is fundamental in the Kademlia protocol, storing the necessary information
+// for routing, communication, and maintaining a decentralized distributed hash table (DHT).
 //
 // References:
 //   - [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"] [Section 2.2, "Node State"]
 //
 // [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"]: https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
 type Node struct {
-	id      NodeID
-	address net.IP
-	port    uint16
+	id      NodeID // Unique identifier for the node.
+	address net.IP // IP address for network communication (IPv4 or IPv6).
+	port    uint16 // Port for listening to incoming connections (range 0-65535).
 }
 
 // NewNode creates and returns a new Node instance with a unique NodeID,

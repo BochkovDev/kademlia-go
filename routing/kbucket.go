@@ -13,26 +13,22 @@ import (
 // size and follows a Least Recently Seen (LRS) eviction policy, where the oldest nodes
 // are removed to make space for newly added or recently active nodes.
 //
-// Fields:
-//   - nodes []node.INode:
-//     A slice of nodes stored in this KBucket. These nodes represent peers at a specific
-//     distance range from the current node. The slice maintains nodes in order of
-//     activity, with the most recently seen node positioned at the end.
-//   - ksize uint8:
-//     The maximum number of nodes that the KBucket can contain. If this limit is reached
-//     when adding a new node, the oldest node is evicted to make room for the new node.
-//   - mu sync.Mutex:
-//     A mutex used to synchronize access to the nodes slice, ensuring that all operations
-//     on the KBucket are thread-safe in concurrent environments.
-//
 // References:
 //   - [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"] [Section 2.2, "Node State"]
-//
-// [Maymounkov, Petar; Mazieres, David. "Kademlia: A Peer-to-peer Information System Based on the XOR Metric"]: https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
+//     https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf
 type KBucket struct {
+	// nodes is a slice of nodes stored in this KBucket. These nodes represent peers at a specific
+	// distance range from the current node. The slice maintains nodes in order of
+	// activity, with the most recently seen node positioned at the end.
 	nodes []node.INode
+
+	// ksize is the maximum number of nodes that the KBucket can contain. If this limit is reached
+	// when adding a new node, the oldest node is evicted to make room for the new node.
 	ksize uint8
-	mu    sync.Mutex
+
+	// mu is a mutex used to synchronize access to the nodes slice, ensuring that all operations
+	// on the KBucket are thread-safe in concurrent environments.
+	mu sync.Mutex
 }
 
 // NewKBucket creates and returns a new KBucket instance with a specified capacity for storing nodes.
